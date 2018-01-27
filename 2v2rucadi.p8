@@ -3,7 +3,7 @@ version 16
 __lua__
 player = 
 {
-	num=0;ammo=0;shieldtime=0; hp=0; x=0;y=0; psx=2; psy=0; air=0; jumping = 0;
+	num=0;ammo=0;shieldtime=0; hp=0; x=0;y=0; psx=2; psy=0; air=0; jumping = 0; 
 }
 
 p1 = player;
@@ -35,18 +35,37 @@ end
 
 
 
+
+function updateSpeed()
+
+	--left
+    if(btn(0, pl.num)) then
+	btn_apretado: t = 0.99
+		player.speedx = spmax * (1-t);
+		t = t*t;
+	end
+		
+	--right
+	if(btn(1,pl.num)) then
+	
+	end
+
+end
+
 function move(pl)
 
 
 	--left
-	if(btn(0, pl.num)) then
+	
+	
+	
+	
 		if(not checkcollision(pl.x - pl.psx, pl.y, 8, 8)) then
 			pl.x -= pl.psx;
 		end
-	end
+
 	
 	--right
-	if(btn(1,pl.num)) then
 		if(not checkcollision(pl.x + pl.psx, pl.y, 8, 8)) then
 			pl.x += pl.psx;
 		end
