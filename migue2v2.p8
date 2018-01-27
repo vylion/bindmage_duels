@@ -14,6 +14,7 @@ function new_player(num, x, y)
 	player.f0 = 0
 	player.standing = false
 	player.d = 1
+	player.hp = 1
 
 
 	return player
@@ -161,11 +162,15 @@ end
 function _init()
 	p1 = new_player(0, 4, 4)
 	p2 = new_player(1, 5, 4)
+	p3 = new_player(2, 6, 4)
+	p4 = new_player(3, 7, 4)
 end
 
 function _update()
 	move_player(p1)
 	move_player(p2)
+	move_player(p3)
+	move_player(p4)
 end
 
 function draw_player(pl)
@@ -206,10 +211,33 @@ function bounds(a, b)
 	end
 end
 
+function getCameraXvalues()
+	sum = 0
+	if (p1.hp > 0) then sum += p1.x end
+	if (p2.hp > 0) then sum += p2.x end
+	if (p3.hp > 0) then sum += p3.x end
+	if (p4.hp > 0) then sum += p4.x end
+	return sum
+end
 
+function getCameraYvalues()
+	sum = 0
+	if (p1.hp > 0) then sum += p1.y end
+	if (p2.hp > 0) then sum += p2.y end
+	if (p3.hp > 0) then sum += p3.y end
+	if (p4.hp > 0) then sum += p4.y end
+	return sum
+end
 
 function _draw()
 	cls()
+
+	-- thunder effects
+	lightning = rnd(100)
+	if  lightning > 99 then
+		rectfill(0, 0, 1024, 1024, 7)
+	end
+	
 	robado()
 	mapdraw(0, 0, 0, 0, 800, 800)
 
@@ -217,17 +245,24 @@ function _draw()
 	print(p1.x)
 	print(p1.y)
 	print(p1.frame)
+	print(lightning % 99)
 	print(p1.standing)
 	
 	-- camera coordinates relative to player's positions
-	cam_x = mid(0,  (p1.x + p2.x), 400)+1
-	cam_y = mid(0,  (p1.y + p2.y), 400)+1
+	clamp_x = getCameraXvalues();
+	clamp_y = getCameraYvalues();
+	cam_x = mid(0, clamp_x, 400)+1
+	cam_y = mid(0, clamp_y, 400)+1
 	camera(cam_x, cam_y)
 	
+	if p1.hp > 0 then draw_player(p1) end
+	if p2.hp > 0 then draw_player(p2) end
+	if p3.hp > 0 then draw_player(p3) end
+	if p4.hp > 0 then draw_player(p4) end
+	-- draw_player(p2)
+	-- draw_player(p3)
+	-- draw_player(p4)
 
-
-	draw_player(p1)
-	draw_player(p2)
 end
 
 __gfx__
