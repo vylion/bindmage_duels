@@ -1,18 +1,18 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
-player = 
+player =
 {
 	num=0;
 	ammo=0;
-	shieldtime=0; 
-	hp=0; 
+	shieldtime=0;
+	hp=0;
 	x=0;
-	y=0; 
-	psx=2; 
-	psy=0; 
-	air=0; 
-	jumping = 0; 
+	y=0;
+	psx=2;
+	psy=0;
+	air=0;
+	jumping = 0;
 	t=0.0;
 	sprite = 0;
 }
@@ -37,7 +37,7 @@ end
 
 function checkcollision(x,y,w,h)
 
- return 
+ return
   solid(x-w,y-h) or
   solid(x+w,y-h) or
   solid(x-w,y+h) or
@@ -54,25 +54,25 @@ function updatespeed(pl)
     if(btn(0, pl.num)) then
 		dir = -1;
 	end
-	
+
 	--right
 	if(btn(1,pl.num)) then
 		dir = 1;
 	end
-	
+
 	if(dir == 0) then
 		if(abs(pl.t)<0.11) then
-			pl.t = 0 
+			pl.t = 0
 		end
-		
+
 		if(pl.t != 0) then
 			if(pl.t<0) then
 				pl.t+=0.15;
-			else 
+			else
 				pl.t+=-0.15;
 			end
-		end	
-		
+		end
+
 	end
 
 	if(dir == 1) then
@@ -84,18 +84,18 @@ function updatespeed(pl)
 			pl.t = 1;
 		end
 	end
-	
+
 	if(dir == -1) then
 		if(pl.t>0) then
 			pl.t = pl.t - 0.1
 		end
-		
+
 		pl.t = pl.t - 0.05;
 		if(pl.t< -1) then
 			pl.t = -1;
 		end
 	end
-	
+
 	pl.psx = pl.t * 3;
 end
 
@@ -103,8 +103,8 @@ end
 
 function updatePlayerSprite(pl)
 	pl.x += pl.psx;
-	if(pl.psx > 0) then 
-		pl.sprite = (pl.sprite+1)%3; 
+	if(pl.psx > 0) then
+		pl.sprite = (pl.sprite+1)%3;
 	elseif(pl.psx <0) then
 		pl.sprite = (pl.sprite+1)%3;
 		if(pl.sprite<3) then
@@ -124,8 +124,8 @@ function move(pl)
 			pl.air = 1;
 		end
 	end
-	
-	
+
+
 	--y update
 
 		if(pl.jumping==1) then
@@ -136,14 +136,14 @@ function move(pl)
 			end
 		end
 
-	if(not solid(pl.x, pl.y+9)) then	--8 + 1 of movement 		
+	if(not solid(pl.x, pl.y+9)) then	--8 + 1 of movement
 		if(pl.jumping == 0) then
 				pl.y +=2; --gravedad
 		end
 	else
 		pl.air = 0;
 	end
-		
+
 end
 function _init()
 	p1.num = 0;
