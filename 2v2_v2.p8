@@ -83,6 +83,20 @@ end
 
 dead_particles = {}
 
+function solid_player(num, x, y)
+	val=mget(x, y)
+	flag = fget(val, 1)--0 = terrain flag
+	coli = false
+	foreach(players, function (p)
+		if (p.num != num) then
+			if not coli then
+				coli = (y > p.y-1 and y < p.y) and (x < p.x+0.5 and x > p.x-0.5)
+			end
+		end
+	end)
+	return (flag or coli)
+end
+
 function solid(x, y)
 	val=mget(x, y)
 	flag = fget(val, 1)--0 = terrain flag
@@ -125,22 +139,22 @@ function move_player(pl)
 	pl.standing = false
 	-- x movement
 	xaux = pl.x + pl.dx + sgn(pl.dx)*0.3
-	if (not solid(xaux, pl.y - 0.5)) then
+	if (not solid_player(pl.num, xaux, pl.y - 0.5)) then
 		pl.x = pl.x + pl.dx
 	else
-		while (not solid(pl.x + sgn(pl.dx)*0.3, pl.y-0.5)) do
+		while (not solid_player(pl.num, pl.x + sgn(pl.dx)*0.3, pl.y-0.5)) do
 			pl.x = pl.x + sgn(pl.dx)*0.1
 		end
 	end
 
 	-- y movement
 	if (pl.dy < 0) then
-		if (solid(pl.x-0.2, pl.y+pl.dy-1) or
-			solid(pl.x+0.2, pl.y+pl.dy-1)) then
+		if (solid_player(pl.num, pl.x-0.2, pl.y+pl.dy-1) or
+			solid_player(pl.num, pl.x+0.2, pl.y+pl.dy-1)) then
 			pl.dy = 0
 			while ( not (
-				solid(pl.x-0.2, pl.y-1) or
-				solid(pl.x+0.2, pl.y-1)))
+				solid_player(pl.num, pl.x-0.2, pl.y-1) or
+				solid_player(pl.num, pl.x+0.2, pl.y-1)))
 				do
 				pl.y = pl.y - 0.01
 			end
@@ -148,14 +162,14 @@ function move_player(pl)
 			pl.y = pl.y + pl.dy
 		end
 	else
-		if (solid(pl.x-0.2, pl.y+pl.dy) or
-			solid(pl.x+0.2, pl.y+pl.dy)) then
+		if (solid_player(pl.num, pl.x-0.2, pl.y+pl.dy) or
+			solid_player(pl.num, pl.x+0.2, pl.y+pl.dy)) then
 			pl.standing=true
 			pl.dy = 0
 
 			while (not (
-				solid(pl.x-0.2,pl.y) or
-				solid(pl.x+0.2,pl.y)
+				solid_player(pl.num, pl.x-0.2,pl.y) or
+				solid_player(pl.num, pl.x+0.2,pl.y)
 				)) do
 				pl.y = pl.y + 0.05
 			end
@@ -200,6 +214,8 @@ end
 function _init()
 	p1 = new_player(0, 4, 4)
 	p2 = new_player(1, 5, 4)
+
+	players = {p1, p2}
 end
 
 function _update()
@@ -218,7 +234,7 @@ end
 n_shots = 0
 
 function draw_shots()
-	--n_shots = 0
+	n_shots = 0
 	foreach(shots, function(s)
 		spr(s.sprite, s.x*8-4, s.y*8-4, 1, 1, s.flip_x, s.flip_y)
 		n_shots += 1
