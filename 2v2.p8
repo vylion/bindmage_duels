@@ -73,11 +73,11 @@ function solid(x, y)
 end
 
 function checkcollision(x,y,w,h)
- return
-  solid(x-w,y-h) or
-  solid(x+w,y-h) or
-  solid(x-w,y+h) or
-  solid(x+w,y+h)
+	return
+	solid(x-w,y-h) or
+	solid(x+w,y-h) or
+	solid(x-w,y+h) or
+	solid(x+w,y+h)
 end
 
 function update_spx(pl)
@@ -212,17 +212,17 @@ end
 
 
 function robado()
-foreach(clouds, function(c)
-			c.x += c.spd
-			rectfill(c.x,c.y,c.x+c.w,c.y+4+(1-c.w/64)*12,new_bg~=nil and 14 or 1)
-			if c.x > 128 then
-				c.x = -c.w
-				c.y=rnd(128-8)
-			end
-		end)
+	foreach(clouds, function(c)
+		c.x += c.spd
+		rectfill(c.x,c.y,c.x+c.w,c.y+4+(1-c.w/64)*12,new_bg~=nil and 14 or 1)
+		if c.x > 128 then
+			c.x = -c.w
+			c.y=rnd(128-8)
+		end
+	end)
 		
 		
-			foreach(particles, function(p)
+	foreach(particles, function(p)
 		p.x += p.spd
 		p.y += sin(p.off)
 		p.off+= min(0.05,p.spd/8)
@@ -243,6 +243,7 @@ foreach(clouds, function(c)
 	end)
 
 end
+
 function _draw()
 	cls()
 	robado()
@@ -255,10 +256,7 @@ function _draw()
 	printplayer(p2)
 	
 	printplayer(p3)
-	printplayer(p4)
-	
-	
-			
+	printplayer(p4)		
 end
 
 __gfx__
