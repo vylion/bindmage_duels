@@ -3,7 +3,7 @@ version 16
 __lua__
 player = 
 {
-	num=0;ammo=0;shieldtime=0; hp=0; x=0;y=0; psx=2; psy=0; air=0; jumping = 0; 
+	num=0;ammo=0;shieldtime=0; hp=0; x=0;y=0; psx=2; psy=0; air=0; jumping = 0; t=0.0;
 }
 
 p1 = player;
@@ -36,41 +36,66 @@ end
 
 
 
-function updateSpeed()
+function updateSpeed(pl)
 
 	--left
+	dir = 0;
     if(btn(0, pl.num)) then
-	btn_apretado: t = 0.99
-		player.speedx = spmax * (1-t);
-		t = t*t;
+		dir = -1;
 	end
-		
+	
 	--right
 	if(btn(1,pl.num)) then
+		dir = 1;
+	end
 	
+	if(dir == 0) then
+		if(abs(pl.t)<0.11) then
+			pl.t = 0 
+		end
+		
+		if(pl.t != 0) then
+			if(pl.t<0) then
+				pl.t+=0.15;
+			else 
+				pl.t+=-0.15;
+			end
+		end	
+		
 	end
 
+	if(dir == 1) then
+		pl.t = pl.t + 0.05;
+		if (pl.t> 1) then
+			pl.t = 1;
+		end
+	end
+	
+	if(dir == -1) then
+		pl.t = pl.t - 0.05;
+		if(pl.t< -1) then
+			pl.t = -1;
+		end
+	end
+	
+	pl.psx = pl.t * 3;
 end
 
 function move(pl)
 
-
 	--left
-	
-	
-	
-	
-		if(not checkcollision(pl.x - pl.psx, pl.y, 8, 8)) then
-			pl.x -= pl.psx;
-		end
+		--if(not checkcollision(pl.x - pl.psx, pl.y, 8, 8)) then
+			--pl.x -= pl.psx;
+		--end
 
-	
 	--right
-		if(not checkcollision(pl.x + pl.psx, pl.y, 8, 8)) then
+		--if(not checkcollision(pl.x + pl.psx, pl.y, 8, 8)) then
+			updateSpeed(pl)
 			pl.x += pl.psx;
-		end
-	end
-
+		--end
+		
+		
+		
 	--jump
 	if(btn(2,pl.num)) then
 		if(pl.air == 0 and pl.jumping==0) then
@@ -110,12 +135,13 @@ function _update()
 end
 function _draw()
 	cls()
-	print(p1.psy)
+	print(p1.t)
+	print(p1.psx)
 	print(flag)
 	print(val)
 	print(cx)
 	print(cy)
- mapdraw(0, 0, 0, 0, 8, 8)
+ mapdraw(0, 0, 0, 0, 32, 32)
 	spr(1,p1.x,p1.y)
 end
 
