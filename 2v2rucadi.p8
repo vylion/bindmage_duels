@@ -65,6 +65,9 @@ function updateSpeed(pl)
 	end
 
 	if(dir == 1) then
+		if(pl.t<0) then
+			pl.t = pl.t + 0.1
+		end
 		pl.t = pl.t + 0.05;
 		if (pl.t> 1) then
 			pl.t = 1;
@@ -72,6 +75,10 @@ function updateSpeed(pl)
 	end
 	
 	if(dir == -1) then
+		if(pl.t>0) then
+			pl.t = pl.t - 0.1
+		end
+		
 		pl.t = pl.t - 0.05;
 		if(pl.t< -1) then
 			pl.t = -1;
