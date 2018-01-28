@@ -29,7 +29,7 @@ k_a=4
 k_b=5
 
 -- Music
-music(1, 0, 12)
+music(-1, 0, 12)
 
 -- color palette
 black = 0
@@ -468,6 +468,8 @@ function getcamerayvalues()
 	return sum
 end
 
+mode = 0
+
 function _init()
 	p1 = new_player(0, 4, 4)
 	p2 = new_player(1, 5, 4)
@@ -479,7 +481,19 @@ function _init()
 	ally(p3, p4)	
 
 	players = {p1, p2, p3, p4}
-	-- music(1, 0, 12)
+	music(1, 0, 12)
+end
+
+function title_update()
+	print("BOTMITTERS")
+	print("Your target is to kill the other team. You can move, but you have to transfer your powers to your partner!")
+	print("Controls (default): D-pad for movement (YOU), B for shield and A for fire (PARTNER)")
+
+
+	if btn(k_a, 0) then 
+		mode = 1 
+		music(1, 0, 12)
+	end
 end
 
 function _update()
@@ -495,6 +509,18 @@ function _update()
 	update_shots()
 	update_hit_effects()
 	update_tomb_effects()
+end
+function title_draw()
+	cls()
+	print("botmitters")
+	print("kill the other team. you can \nmove, but you have to transmit \nyour powers to your partner!\n")
+	print("d-pad for movement (YOU),\nB -> shield, A -> fire (PARTNER)\n\n")
+	
+	print("mata al otro equipo. puedes \nmoverte, pero debes transmitir tus poderes \na tu colega!\n")
+	print("d-pad moverse (TU),\nb -> escudo, a -> fuego (COLEGA)\n")
+
+
+	print("a -> JUGAR/PLAY.")
 end
 
 function _draw()
@@ -516,6 +542,8 @@ function _draw()
 	draw_hit_effects()
 	draw_tomb_effects()
 end
+
+
 
 __gfx__
 0000000000e2200000e2200000e2200000e220000000000000000000000000000000000000555500005555000000000000000000000000000000000000000000
