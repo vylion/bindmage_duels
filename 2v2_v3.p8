@@ -29,7 +29,70 @@ function title_scene:update()
 end
 function title_scene:draw()
 	cls()
+	print("         bINDmAGE dUELS\n")
+	print("kill the other team. yOU can \nmove, but you have to transfer \nyour powers (fire, shield) to \nyour pARTNER in order to win!")
+	print("\n tEAM garnet  -> pLAYERS 1+2")
+	print("\n tEAM emerald -> pLAYERS 3+4")
+	print("\ncontrols (DEFAULT): \n    + -> move (yOU)\n   \142 -> fIRE   (pARTNER)\n   \151 -> sHIELD (pARTNER)\n")
+	print("\n pRESS any KEY TO start")
 end
+
+
+
+
+garnet_scene = {}
+function garnet_scene:init()
+	music(0, 0, 12)
+end
+function garnet_scene:update()
+	any_press = false
+	for i=0,6 do
+		if(btnp(i)) then
+			any_press = true
+			break
+		end
+	end
+	if any_press then
+		current_scene = game_scene
+		current_scene:init()
+	end
+end
+function garnet_scene:draw()
+	cls()
+	camera(0,0)
+	print("    tEAM garnet hAS wON!!!\n\n")
+	print("\n pRESS any KEY TO restart")
+
+end
+
+
+emerald_scene = {}
+function emerald_scene:init()
+	music(0, 0, 12)
+end
+function emerald_scene:update()
+	any_press = false
+	for i=0,6 do
+		if(btnp(i)) then
+			any_press = true
+			break
+		end
+	end
+	if any_press then
+		current_scene = game_scene
+		current_scene:init()
+	end
+end
+function emerald_scene:draw()
+	cls()
+	camera(0,0)
+	print("    tEAM emerald hAS wON!!!\n\n")
+	print("\n pRESS any KEY TO restart")
+end
+
+
+
+
 
 game_scene = {}
 function game_scene:init()
@@ -69,6 +132,7 @@ function game_scene:update()
 	update_hit_effects()
 	update_tomb_effects()
 	update_magicdust()
+	update_kill()
 end
 
 function game_scene:draw()
@@ -90,16 +154,25 @@ function game_scene:draw()
 	--draw_lines(players[3], players[4], brown)
 
 	mapdraw(0, 0, 0, 0, 20, 20, 2)
+	
 
-	foreach(players, function(p)
-		draw_player(p)
-		draw_interface(p, ant_cam_x, ant_cam_y)
-	end)
-	draw_shots()
-	draw_hit_effects()
-	draw_tomb_effects()
+	lightning = rnd(100)
+	if  lightning > 99 then
+		rectfill(0, 0, 1024, 1024, 7)
+		draw_rain_effects(1)
+	else 
+		draw_rain_effects(0)
 
-	draw_magicdust()
+		foreach(players, function(p)
+			draw_player(p)
+			draw_interface(p, ant_cam_x, ant_cam_y)
+		end)
+		draw_shots()
+		draw_hit_effects()
+		draw_tomb_effects()
+
+		draw_magicdust()
+	end
 end
 
 function new_player(num, x, y)
@@ -120,6 +193,7 @@ function new_player(num, x, y)
 	player.hp = 10
 	player.dead = false
 	player.shieldtime = 0
+	player.stun = 0
 	player.dust = {}
 	make_playerdust(player, true)
 	for i=0,player.ammo do
@@ -180,6 +254,39 @@ magic_delay = 30
 hiteffects = {}
 tombeffects = {}
 magicdust = {}
+rain_parts = {}
+
+for i=0,48 do
+	add(rain_parts,{
+		x = rnd(128*2),
+		y = rnd(128*2),
+		s = 2 + flr(rnd(5)/4),
+		spd = 2 + rnd(1),
+		off = rnd(3),
+		col = 7 --+ flr(0.5 + rnd(1))
+	})
+end
+
+
+function draw_rain_effects(value)
+	foreach(rain_parts, function(p)
+		p.x += rnd(2) -- sin(p.off)
+		p.y += p.spd*(rnd(4)+1)
+		p.off += min(0.05, p.spd/8)
+
+		if value == 1 then
+			rectfill(p.x, p.y, p.x, p.y+(3*p.s), 0 )
+		else
+			rectfill(p.x, p.y, p.x, p.y+(3*p.s), p.col )
+		end
+
+		if p.y>128+4 then 
+			p.x = rnd(256)
+			p.y = -4
+		end
+		
+	end)
+end
 
 function make_tomb_effect(startx, starty)
 
@@ -559,6 +666,9 @@ function update_cd(pl)
 		pl.ammo_cd -= 1
 		if(pl.ammo_cd == 0) pl.ammo = 3
 	end
+	if (pl.stun > 0) then
+		pl.stun -= 1
+	end
 end
 
 function player_shoot(pl)
@@ -592,6 +702,11 @@ function collide_shoot(shot)
 				if ret["coli"] then
 					if (not p.dead and p.shieldtime <= 0) then
 						p.hp -= shot.damage
+						--stun impulse
+						p.dx += shot.dx
+						p.dy -= 0.2
+						--stun effect
+						p.stun = 15
 						if (p.hp <= 0) then
 							p.dead = true
 							-- tomb effect
@@ -626,6 +741,7 @@ function collide_shoot(shot)
 							make_hit_effect(p.x*8,(p.y-0.5)*8,red,yellow)
 						end
 					end
+ 					sfx(16)
 				end
 			end
 		end
@@ -664,6 +780,7 @@ function update_shots()
 						make_hit_effect(sx*8,sy*8,red,yellow)
 					end
 				end
+ 				sfx(15)
 				quickdel(shots, i)
 			elseif coll["coli"] and not coll["shield"] then
 				quickdel(shots, i)
@@ -681,7 +798,11 @@ end
 
 function draw_player(pl)
 	if (not pl.dead) then
-		spr(16*pl.num+1 + pl.frame,pl.x*8-4,pl.y*8-8, 1, 1, pl.d < 0)
+		if (pl.stun > 0 and pl.stun % 2 == 0) then
+			spr(16,pl.x*8-4,pl.y*8-8, 1, 1, pl.d < 0)
+		else
+			spr(16*pl.num+1 + pl.frame,pl.x*8-4,pl.y*8-8, 1, 1, pl.d < 0)
+		end
 		if (pl.shieldtime > 0) then
 			circ(pl.x*8,pl.y*8-4, 5, blue)
 			circ(pl.x*8,pl.y*8-4, 4.75, white)
@@ -773,6 +894,19 @@ function draw_lines(p1,p2,col)
 	line(p1.x*8, (p1.y-0.5)*8, p2.x*8, (p2.y-0.5)*8, col)
 end
 
+function update_kill()
+	if players[1].dead and players[2].dead then
+		current_scene = emerald_scene
+	else if players[3].dead and players[4].dead then
+			current_scene = garnet_scene
+		end
+	end
+	if (current_scene != game_scene) then 
+		current_scene:init() 
+	end
+end
+
+
 function _init()
 	palt(15, true) -- beige color as transparency is true
     palt(0, false) -- black color as transparency is false
@@ -798,30 +932,30 @@ fff77ffffe00002ffe000022fe000022fe00002ff3bbaaabf133bbb3fd1133310010001001000100
 ff7ff7ffff200222ff200222ff200222ff200222fffbbbbffff3333ffff1111f6ddd066dd06d6dd0166ddd0655dddd66a45650a4a95650a4ffffffffffffffff
 ffffffffffe222f2ffe2222fffe222ffffe222f2ffffffffffffffffffffffffdddd16ddd16ddd100ddddd16511111d6d4450a4dd4950a94ffffffffffffffff
 fffffffffee222fffe2222ffffe2222fffe222ffffffffffffffffffffffffffddd10ddd10ddd10001ddd1011111111ddd4204dd4d42044dffffffffffffffff
-ffffffffff422fffff422fffff422fffff422fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-fffffffff42222fff42222fff42222fff42222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ffffffff4200002f4200002f4200002f4200002ffffaaaaffff9999ffff8888fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-fffffffff40b0b2ff40b0b2ff40b0b2ff40b0b2f8f9a777a2f89aaa95f289998ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-fffffffff400002ff4000022f4000022f400002ff9aa777af899aaa9f2889998ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ffffffffff200222ff200222ff200222ff200222fffaaaaffff9999ffff8888fffffffffffffffffffaffcffff5ff5ffffffffffffffffffffffffffffffffff
-ffffffffff4222f2ff42222fff4222ffff4222f2ffffffffffffffffffffffffffffffffffffffffffaffcffff5ff5ffffffffffffffffffffffffffffffffff
-fffffffff44222fff42222ffff42222fff4222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ffffffffffc33fffffc33fffffc33fffffc33fffff5555ffff5555ffff5555ffff5555ffffffffffffe22fffffe22fffffffffffffffffffffffffffffffffff
-fffffffffc3333fffc3333fffc3333fffc3333fff552e55ff552455ff553c55ff553b55ffffffffffe2222fffe2222ff8ffffffffcffffffffffffffffffffff
-ffffffffc300003fc300003fc300003fc300003f55622755556227555563375555633755ffffffffe200002fe200002f8ffffffffcffffffffffffffffffffff
-fffffffffc08083ffc08083ffc08083ffc08083f5d6666755d6666755d6666755d666675fffffffffe0c0c2ffe0c0c2f8ffffffffcffffffffffffffffffffff
-fffffffffc00003ffc000033fc000033fc00003f566c6c65566b6b655668686556696965fffffffffe00002ffe00002fffffffffffffffffffffffffffffffff
-ffffffffff300333ff300333ff300333ff3003335d6666655d6666655d6666655d666665ffffffffff200222ff200222ffffffffffffffffffffffffffffffff
-ffffffffffc333f3ffc3333fffc333ffffc333f35d6ddd655d6ddd655d6ddd655d6ddd65ffffffffffe222f2ffe222f2ffffffffffffffffffffffffffffffff
-fffffffffcc333fffc3333ffffc3333fffc333ff5d6666655d6666655d6666655d666665fffffffffee222fffee222ffffffffffffffffffffffffffffffffff
-ff777fffffb33fffffb33fffffb33fffffb33fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-f77777fffb3333fffb3333fffb3333fffb3333ffff7777ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-7777777fb300003fb300003fb300003fb300003ff776c77fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-f777777ffb09093ffb09093ffb09093ffb09093ff76ccc7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-f777777ffb00003ffb000033fb000033fb00003ff7ccc17fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ff777777ff300333ff300333ff300333ff300333f77c177fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ff7777f7ffb333f3ffb3333fffb333ffffb333f3ff7777ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-f77777fffbb333fffb3333ffffb3333fffb333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ff777fffff422fffff422fffff422fffff422fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+f77777fff42222fff42222fff42222fff42222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+7777777f4200002f4200002f4200002f4200002ffffaaaaffff9999ffff8888fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+f777777ff40b0b2ff40b0b2ff40b0b2ff40b0b2f8f9a777a2f89aaa95f289998ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+f777777ff400002ff4000022f4000022f400002ff9aa777af899aaa9f2889998ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ff777777ff200222ff200222ff200222ff200222fffaaaaffff9999ffff8888fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ff7777f7ff4222f2ff42222fff4222ffff4222f2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+f77777fff44222fff42222ffff42222fff4222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffc33fffffc33fffffc33fffffc33fffff5555ffff5555ffff5555ffff5555ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffc3333fffc3333fffc3333fffc3333fff552e55ff552455ff553c55ff553b55fffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffc300003fc300003fc300003fc300003f55622755556227555563375555633755ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffc08083ffc08083ffc08083ffc08083f5d6666755d6666755d6666755d666675ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffc00003ffc000033fc000033fc00003f566c6c65566b6b655668686556696965ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffff300333ff300333ff300333ff3003335d6666655d6666655d6666655d666665ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffc333f3ffc3333fffc333ffffc333f35d6ddd655d6ddd655d6ddd655d6ddd65ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffcc333fffc3333ffffc3333fffc333ff5d6666655d6666655d6666655d666665ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffb33fffffb33fffffb33fffffb33fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffb3333fffb3333fffb3333fffb3333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffb300003fb300003fb300003fb300003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffb09093ffb09093ffb09093ffb09093fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffb00003ffb000033fb000033fb00003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffff300333ff300333ff300333ff300333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffb333f3ffb3333fffb333ffffb333f3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffbb333fffb3333ffffb3333fffb333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 0000000000000000000611110000000000000000000111116660000066666660000000000000000000000000000000110d000000000000000000000011111111
 00000000000000000011111100111111000000000011111166660000166666660000000000000000000000000000011111160000000000000000000011111111
 000000000000000011111111011111116000000011111111166660001666666660000000000000000000000000006111111100000000000000000000d111111d
@@ -1052,13 +1186,15 @@ __sfx__
 011400000b05007050070500a0500505005050040500405004055040550705507055070550905509055090550b05007050070500a0500505005050040500405004055040550705507055070550a0550a0550a055
 011400002405524055240552405523055230552305523055230552305523055230552305523055230552305523055230552305523055230552305523055230552405524055240552405523055230552305523055
 01140000210552105521055210551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f0551f055
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000e7500e7500e750127501575016750177501a7501c7501e7501d7501c7501a7501775016750187501a7501d75020750237502575026750287502a7502b7502d7502e7502f7502f7502f7502f7502f750
 0001000017750177501875018750197501a7501b7501c7501c7501d7501e7501e7501f750207502075021750227502275023750257502675027750287502a7502a7502c7502e7502f75031750337503575036750
 00010000316543a6503d6503d6503a6503165025650126500d6500b6500b6500a6500965008650086500765006650056500365003650026500165201652016520165201652016520165201652016520165201652
 00020000383503a350303502b350283502635023350203501e3501c3501a350183501535013350113500f3500d3500c3500b35009350073500635004350033500235002350023500135001350013500135001350
 0002000013e7516e7519e751be751de751fe7521e7523e7524e7523e7521e751fe751ce7519e7517e7514e7513e7511e750fe750ee750ce750be750ae7509e7509e750ae750be750ce750fe7510e7512e7515e75
+000100000d450114501645011450134500e4501645014450124500f45016450124500d4500c4000c4000c4000c4000c4000c4000c4000c4000c4000c4000c4000c4000c4000c4000c4000c4000c4000c4000c400
+000200001175013750177501c7501f75024750297502f750297501b750127500c7500975008750097500c7500d750087500475003750037500475006750077500875006750037500175001750017500175001750
 __music__
-00 40414244
+04 0a414244
 01 00010244
 00 00010248
 00 40060405
