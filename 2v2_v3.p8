@@ -97,9 +97,8 @@ end
 function garnet_scene:draw()
 	cls()
 	camera(0,0)
-	print("    tEAM garnet hAS wON!!!\n\n")
-	print("\n pRESS any KEY TO restart")
-
+	text("tEAM garnet hAS wON!!!", vcenter("tEAM garnet hAS wON!!!"), "left", pink, dark_pink)
+	text("pRESS any KEY TO restart", vcenter("pRESS any KEY TO restart") + 20, "none", yellow, nil)
 end
 
 
@@ -123,8 +122,8 @@ end
 function emerald_scene:draw()
 	cls()
 	camera(0,0)
-	print("    tEAM emerald hAS wON!!!\n\n")
-	print("\n pRESS any KEY TO restart")
+	text("tEAM emerald hAS wON!!!", vcenter(" tEAM emerald hAS wON!!!"), "left", green, dark_green)
+	text("pRESS any KEY TO restart", vcenter("pRESS any KEY TO restart") + 20, "none", yellow, nil)
 end
 
 
