@@ -245,7 +245,10 @@ function game_scene:init()
 	p4 = new_player(3, 16, 16)
 
 	-- random_torches()
-
+	shots = {}
+	hiteffects = {}
+	tombeffects = {}
+	magicdust = {}
 	ally(p1, p2)
 	ally(p3, p4)
 
@@ -418,10 +421,6 @@ pixels_per_second = 20
 magic_delay = 30
 
 -- effects-----
-
-hiteffects = {}
-tombeffects = {}
-magicdust = {}
 rain_parts = {}
 
 rain_splash = {}
@@ -1202,8 +1201,6 @@ function _init()
 	palt(15, true) -- beige color as transparency is true
     palt(0, false) -- black color as transparency is false
 
-    ant_cam_x = 0
-    ant_cam_y = 0
 	current_scene = title_scene
 	current_scene:init()
 end
