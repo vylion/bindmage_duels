@@ -190,7 +190,6 @@ function game_scene:draw()
 	--draw_lines(players[1], players[2], dark_green)
 	--draw_lines(players[3], players[4], brown)
 
-	mapdraw(0, 0, 0, 0, 20, 20, 2)
 	
 
 	lightning = rnd(100)
@@ -199,6 +198,7 @@ function game_scene:draw()
 		draw_rain_effects(1)
 	else 
 		draw_rain_effects(0)
+		mapdraw(0, 0, 0, 0, 20, 20, 2)
 
 		foreach(players, function(p)
 			draw_player(p)
