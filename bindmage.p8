@@ -26,17 +26,26 @@ end
 
 function title_scene:init()
 	title_scene.delay = 45
+	btnp0 = false
+	btnp1 = false
+	btnp2 = false
+	btnp3 = false
 end
 function title_scene:update()
 	if (title_scene.delay <= 0) then
 		any_press = false
 		for i=0,6 do
-			if(btnp(i)) then
-				any_press = true
-				break
+			if(btnp(i, 0)) then
+				btnp0 = true
+			elseif (btnp(i, 1)) then
+				btnp1 = true
+			elseif (btnp(i, 2)) then
+				btnp2 = true
+			elseif (btnp(i, 3)) then
+				btnp3 = true
 			end
 		end
-		if any_press then
+		if btnp0 and btnp1 and btpn2 and btpn3 then
 			current_scene = game_scene
 			current_scene:init()
 		end
@@ -79,6 +88,19 @@ function title_scene:draw()
 	if (title_scene.delay <= 0) then
 		text("press any key to start", 0, 120, "left", yellow, brown)
 	end
+
+	if (btnp0 == true) then
+		text("P1", -60, 89, "left", pink, dark_pink)
+	end
+	if (btnp1 == true) then
+		text("P2", -60, 105, "left", pink, dark_pink)
+	end
+	if (btnp2 == true) then
+		text("P3", 60, 89, "left", green, dark_green)
+	end
+	if (btnp3 == true) then
+		text("P4", 60, 105, "left", green, dark_green)
+	end
 end
 
 
@@ -88,15 +110,24 @@ garnet_scene = {}
 function garnet_scene:init()
 	music(0, 0, 12)
 	garnet_scene.delay = 60
+	btnp0 = false
+	btnp1 = false
+	btnp2 = false
+	btnp3 = false
 end
 function garnet_scene:update()
 	update_splash_effects()
 	any_press = false
 	if garnet_scene.delay <= 0 then
 		for i=0,6 do
-			if(btnp(i)) then
-				any_press = true
-				break
+			if(btnp(i, 0)) then
+				btnp0 = true
+			elseif (btnp(i, 1)) then
+				btnp1 = true
+			elseif (btnp(i, 2)) then
+				btnp2 = true
+			elseif (btnp(i, 3)) then
+				btnp3 = true
 			end
 		end
 		if any_press then
@@ -156,6 +187,19 @@ function garnet_scene:draw()
 	spr(17,ant_cam_x + 5*8-4,ant_cam_y + 6*8-8)
 	spr(tombstone+2, ant_cam_x + 11*8-4,ant_cam_y + 6*8-8, 1, 1, true)
 	spr(tombstone+3, ant_cam_x + 12*8-4,ant_cam_y + 6*8-8, 1, 1, true)
+
+	if (btnp0 == true) then
+		text("P1", -60, 89, "left", pink, dark_pink)
+	end
+	if (btnp1 == true) then
+		text("P2", -60, 105, "left", pink, dark_pink)
+	end
+	if (btnp2 == true) then
+		text("P3", 60, 89, "left", green, dark_green)
+	end
+	if (btnp3 == true) then
+		text("P4", 60, 105, "left", green, dark_green)
+	end
 end
 
 
@@ -163,15 +207,24 @@ emerald_scene = {}
 function emerald_scene:init()
 	music(0, 0, 12)
 	emerald_scene.delay = 60
+	btnp0 = false
+	btnp1 = false
+	btnp2 = false
+	btnp3 = false
 end
 function emerald_scene:update()
 	update_splash_effects()
 	if (emerald_scene.delay <= 0) then
 		any_press = false
 		for i=0,6 do
-			if(btnp(i)) then
-				any_press = true
-				break
+			if(btnp(i, 0)) then
+				btnp0 = true
+			elseif (btnp(i, 1)) then
+				btnp1 = true
+			elseif (btnp(i, 2)) then
+				btnp2 = true
+			elseif (btnp(i, 3)) then
+				btnp3 = true
 			end
 		end
 		if any_press then
@@ -231,6 +284,19 @@ function emerald_scene:draw()
 	spr(49,ant_cam_x + 5*8-4,ant_cam_y + 6*8-8)
 	spr(tombstone+0, ant_cam_x + 11*8-4,ant_cam_y + 6*8-8, 1, 1, true)
 	spr(tombstone+1, ant_cam_x + 12*8-4,ant_cam_y + 6*8-8, 1, 1, true)
+
+	if (btnp0 == true) then
+		text("P1", -60, 89, "left", pink, dark_pink)
+	end
+	if (btnp1 == true) then
+		text("P2", -60, 105, "left", pink, dark_pink)
+	end
+	if (btnp2 == true) then
+		text("P3", 60, 89, "left", green, dark_green)
+	end
+	if (btnp3 == true) then
+		text("P4", 60, 105, "left", green, dark_green)
+	end
 end
 
 
