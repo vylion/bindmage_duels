@@ -79,15 +79,15 @@ hitEffects = {}
 tombEffects = {}
 
 function make_tomb_effect(startx, starty)
- 
+
  local tomb_particle = {
    x=startx,
    y=starty,
    t = 0,
-   
+
    life_time=20+rnd(10),
 
-   
+
    size = 1,
    min_size = 0,
    max_size = 1+rnd(3),
@@ -95,7 +95,7 @@ function make_tomb_effect(startx, starty)
    dy = rnd(0.7) * -1,
    dx = rnd(0.7) - 0.2,
 
-   
+
    ddy = -0.05,
 
    col = 7
@@ -134,22 +134,22 @@ function draw_tomb_effects()
 end
 
 function make_hit_effect(startx, starty, colini, colfinal)
- 
+
  local hit_particle = {
    x=startx,
    y=starty,
    t = 0,
-   
+
    life_time=6+rnd(4),
 
-   
+
    size = 1,
    max_size = 1+rnd(1),
 
    dx = rnd(4.0) -2.0;
    dy = rnd(4.0) -2.0;
 
-   
+
    ddy = -0.1,
 
    col = colini,
@@ -204,7 +204,7 @@ function new_shot(pl)
 		shot.sprite = 5
 	else
 		shot.sprite = 21
-	end		
+	end
 	shot.flip_x = pl.d < 0
 	shot.flip_y = false
 	shot.friendly = {}
@@ -365,8 +365,8 @@ function collide_shoot(shot)
 	foreach(players, function (p)
 		if (shot.friendly[p.num] == nil) then
 			if not ret["coli"] then
-				ret["coli"] = ((shot.y-0.2 > p.y-1 and shot.y-0.2 < p.y) or 
-						(shot.y+0.2 > p.y-1 and shot.y+0.2 < p.y)) and 
+				ret["coli"] = ((shot.y-0.2 > p.y-1 and shot.y-0.2 < p.y) or
+						(shot.y+0.2 > p.y-1 and shot.y+0.2 < p.y)) and
 						((shot.x < p.x+0.5 and shot.x > p.x-0.5))
 				if ret["coli"] then
 					if (not p.dead and p.shieldtime <= 0) then
@@ -511,8 +511,8 @@ function getcamerayvalues()
 end
 
 function appr(val,target,amount)
-	return val > target 
- 		and max(val - amount, target) 
+	return val > target
+ 		and max(val - amount, target)
  		or min(val + amount, target)
 end
 
@@ -522,9 +522,9 @@ function _init()
 	p3 = new_player(2, 6, 4)
 	p4 = new_player(3, 7, 4)
 
-	
+
 	ally(p1, p2)
-	ally(p3, p4)	
+	ally(p3, p4)
 
 	players = {p1, p2, p3, p4}
 	music(1, 0, 12)
@@ -544,7 +544,7 @@ function _update()
 			player_shoot(p)
 			player_shield(p)
 		end
-		
+
 	end)
 
 	update_shots()
@@ -554,7 +554,6 @@ end
 
 function _draw()
 	cls()
-	mapdraw(0, 0, 0, 0, 200, 200)
 	camera(0, 0) -- show ui elements w/o cam conditionals
 
 	clamp_x = getcameraxvalues();
@@ -564,6 +563,7 @@ function _draw()
 	ant_cam_x = appr(ant_cam_x, cam_x, pixels_per_second/30)
 	ant_cam_y = appr(ant_cam_y, cam_y, pixels_per_second/30)
 	camera(ant_cam_x, ant_cam_y)
+	mapdraw(0, 0, 0, 0, 200, 200)
 
 	foreach(players, function(p)
 		draw_player(p)
@@ -826,4 +826,3 @@ __music__
 00 00010209
 00 00010208
 02 00010209
-
