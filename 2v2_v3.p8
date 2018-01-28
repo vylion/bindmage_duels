@@ -4,14 +4,26 @@ __lua__
 -- bindmage duels
 -- by rucadi, dani, mnxanl, vylion
 
---11 saltar
---12 disparar
---13 matar o morir como lo veas
---14 escudo
 
 current_scene = {}
 
 title_scene = {}
+
+function hcenter(s)
+  -- screen center minus the
+  -- string length times the 
+  -- pixels in a char's width,
+  -- cut in half
+  return 64-#s*2
+end
+ 
+function vcenter(s)
+  -- screen center minus the
+  -- string height in pixels,
+  -- cut in half
+  return 61
+end
+
 function title_scene:init()
 end
 function title_scene:update()
@@ -27,14 +39,39 @@ function title_scene:update()
 		current_scene:init()
 	end
 end
+
+function text(str, y, shadow, col1, col2)
+	if (shadow == "none") then
+		print(str, hcenter(str), y, col1)
+	elseif (shadow == "left") then
+		print(str, hcenter(str) - 1, y, col2)
+		print(str, hcenter(str), y, col1)
+	elseif (shadow == "right") then
+		print(str, hcenter(str) + 1, y, col2)
+		print(str, hcenter(str), y, col1)
+	elseif (shadow == "top") then
+		print(str, hcenter(str), y - 1, col2)
+		print(str, hcenter(str), y, col1)
+	elseif (shadow == "bot") then
+		print(str, hcenter(str), y + 1, col2)
+		print(str, hcenter(str), y, col1)
+	end
+end
+
 function title_scene:draw()
 	cls()
-	print("         bINDmAGE dUELS\n")
-	print("kill the other team. yOU can \nmove, but you have to transfer \nyour powers (fire, shield) to \nyour pARTNER in order to win!")
-	print("\n tEAM garnet  -> pLAYERS 1+2")
-	print("\n tEAM emerald -> pLAYERS 3+4")
-	print("\ncontrols (DEFAULT): \n    + -> move (yOU)\n   \142 -> fIRE   (pARTNER)\n   \151 -> sHIELD (pARTNER)\n")
-	print("\n pRESS any KEY TO start")
+	text("bINDmAGE dUELS", 3, "left", orange, dark_pink)
+	text("kill the other team. yOU can", 21, "left", white, dark_grey)
+	text("move, but you have to transfer", 29, "left", white, dark_grey)
+	text("your powers (fire, shield) to", 37, "left", white, dark_grey)
+	text("your pARTNER in order to win!", 45, "left", white, dark_grey)
+	text("tEAM garnet  -> pLAYERS 1+2", 57, "left", pink, dark_pink)
+	text("tEAM emerald -> pLAYERS 3+4", 69, "left", green, dark_green)
+	text("controls (DEFAULT): ", 81, "left", white, dark_grey)
+	text("+  -> move (yOU)", 89, "left", blue, dark_blue)
+	text("\142 -> fIRE (pARTNER)", 97, "left", blue, dark_blue)
+	text("\151 -> sHIELD (pARTNER)", 105, "left", blue, dark_blue)
+	text("pRESS any KEY TO start", 120, "none", yellow, nil)
 end
 
 
@@ -165,7 +202,8 @@ function game_scene:draw()
 
 		foreach(players, function(p)
 			draw_player(p)
-			draw_interface(p, ant_cam_x, ant_cam_y)
+			-- draw_interface(p, ant_cam_x, ant_cam_y)
+			draw_life_diegetic(p)
 		end)
 		draw_shots()
 		draw_hit_effects()
@@ -256,7 +294,7 @@ tombeffects = {}
 magicdust = {}
 rain_parts = {}
 
-for i=0,48 do
+for i=0,16 do
 	add(rain_parts,{
 		x = rnd(128*2),
 		y = rnd(128*2),
@@ -826,6 +864,22 @@ function draw_life(pl, pos_x, pos_y)
 	end
 	if (pl.hp < 10) then
 		rectfill(pos_x + (pl.num*30 + 9) + pl.hp*2, pos_y + y_bar*8 + 3, pos_x + (pl.num*30 + 8) + pl.hp*2 + (10-pl.hp)*2, pos_y + y_bar*8 + 4, hp_red)
+	end
+end
+
+--Diegetic life bar, under each player
+function draw_life_diegetic(pl)
+	--line(x0, y0, xN, yN, hp_green)
+	posX = pl.x*8 - 5
+	posY = pl.y*8 + 2
+	if pl.hp ~= 0 then
+		if (0 < pl.hp) then
+			line(posX, posY, posX+pl.hp, posY, hp_green)
+		end
+		if (10 > pl.hp) then
+			line(posX+pl.hp+1, posY, posX+10, posY, hp_red)
+		end
+		line(posX, posY-1, posX+pl.hp, posY-1, hp_bar)
 	end
 end
 
