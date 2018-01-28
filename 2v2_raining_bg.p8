@@ -165,7 +165,8 @@ function game_scene:draw()
 
 		foreach(players, function(p)
 			draw_player(p)
-			draw_interface(p, ant_cam_x, ant_cam_y)
+			draw_life_diegetic(p)
+			--draw_interface(p, ant_cam_x, ant_cam_y)
 		end)
 		draw_shots()
 		draw_hit_effects()
@@ -193,6 +194,7 @@ function new_player(num, x, y)
 	player.hp = 10
 	player.dead = false
 	player.shieldtime = 0
+	player.stun = 0
 	player.dust = {}
 	make_playerdust(player, true)
 	for i=0,player.ammo do
@@ -665,6 +667,9 @@ function update_cd(pl)
 		pl.ammo_cd -= 1
 		if(pl.ammo_cd == 0) pl.ammo = 3
 	end
+	if (pl.stun > 0) then
+		pl.stun -= 1
+	end
 end
 
 function player_shoot(pl)
@@ -698,6 +703,11 @@ function collide_shoot(shot)
 				if ret["coli"] then
 					if (not p.dead and p.shieldtime <= 0) then
 						p.hp -= shot.damage
+						--stun impulse
+						p.dx += shot.dx
+						p.dy -= 0.2
+						--stun effect
+						p.stun = 15
 						if (p.hp <= 0) then
 							p.dead = true
 							-- tomb effect
@@ -789,7 +799,11 @@ end
 
 function draw_player(pl)
 	if (not pl.dead) then
-		spr(16*pl.num+1 + pl.frame,pl.x*8-4,pl.y*8-8, 1, 1, pl.d < 0)
+		if (pl.stun > 0 and pl.stun % 2 == 0) then
+			spr(16, pl.x*8-4, pl.y*8-8, 1, 1, pl.d < 0)
+		else
+			spr(16*pl.num+1 + pl.frame,pl.x*8-4,pl.y*8-8, 1, 1, pl.d < 0)
+		end
 		if (pl.shieldtime > 0) then
 			circ(pl.x*8,pl.y*8-4, 5, blue)
 			circ(pl.x*8,pl.y*8-4, 4.75, white)
@@ -806,13 +820,31 @@ function draw_shots()
 	end)
 end
 
+-- Std life bar
 function draw_life(pl, pos_x, pos_y)
 	rect(pos_x + pl.num*30 + 8, pos_y + y_bar*8 + 2, pos_x + (pl.num*30)+29, pos_y + y_bar*8 + 5, hp_bar)
-	if (pl.hp > 0) then
-		rectfill(pos_x + pl.num*30 + 9, pos_y + y_bar*8 + 3, pos_x + (pl.num*30 + 8) + pl.hp*2, pos_y + y_bar*8 + 4, hp_green)
-	end
-	if (pl.hp < 10) then
-		rectfill(pos_x + (pl.num*30 + 9) + pl.hp*2, pos_y + y_bar*8 + 3, pos_x + (pl.num*30 + 8) + pl.hp*2 + (10-pl.hp)*2, pos_y + y_bar*8 + 4, hp_red)
+	
+		if (pl.hp > 0) then
+			rectfill(pos_x + pl.num*30 + 9, pos_y + y_bar*8 + 3, pos_x + (pl.num*30 + 8) + pl.hp*2, pos_y + y_bar*8 + 4, hp_green)
+		end
+		if (pl.hp < 10) then
+			rectfill(pos_x + (pl.num*30 + 9) + pl.hp*2, pos_y + y_bar*8 + 3, pos_x + (pl.num*30 + 8) + pl.hp*2 + (10-pl.hp)*2, pos_y + y_bar*8 + 4, hp_red)
+		end
+end
+
+--Diegetic life bar, under each player
+function draw_life_diegetic(pl)
+	--line(x0, y0, xN, yN, hp_green)
+	posX = pl.x*8 - 5
+	posY = pl.y*8 + 2
+	if pl.hp ~= 0 then
+		if (0 < pl.hp) then
+			line(posX, posY, posX+pl.hp, posY, hp_green)
+		end
+		if (10 > pl.hp) then
+			line(posX+pl.hp+1, posY, posX+10, posY, hp_red)
+		end
+		line(posX, posY-1, posX+pl.hp, posY-1, hp_bar)
 	end
 end
 
@@ -919,30 +951,30 @@ fff77ffffe00002ffe000022fe000022fe00002ff3bbaaabf133bbb3fd1133310010001001000100
 ff7ff7ffff200222ff200222ff200222ff200222fffbbbbffff3333ffff1111f6ddd066dd06d6dd0166ddd0655dddd66a45650a4a95650a4ffffffffffffffff
 ffffffffffe222f2ffe2222fffe222ffffe222f2ffffffffffffffffffffffffdddd16ddd16ddd100ddddd16511111d6d4450a4dd4950a94ffffffffffffffff
 fffffffffee222fffe2222ffffe2222fffe222ffffffffffffffffffffffffffddd10ddd10ddd10001ddd1011111111ddd4204dd4d42044dffffffffffffffff
-ffffffffff422fffff422fffff422fffff422fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-fffffffff42222fff42222fff42222fff42222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ffffffff4200002f4200002f4200002f4200002ffffaaaaffff9999ffff8888fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-fffffffff40b0b2ff40b0b2ff40b0b2ff40b0b2f8f9a777a2f89aaa95f289998ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-fffffffff400002ff4000022f4000022f400002ff9aa777af899aaa9f2889998ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ffffffffff200222ff200222ff200222ff200222fffaaaaffff9999ffff8888fffffffffffffffffffaffcffff5ff5ffffffffffffffffffffffffffffffffff
-ffffffffff4222f2ff42222fff4222ffff4222f2ffffffffffffffffffffffffffffffffffffffffffaffcffff5ff5ffffffffffffffffffffffffffffffffff
-fffffffff44222fff42222ffff42222fff4222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ffffffffffc33fffffc33fffffc33fffffc33fffff5555ffff5555ffff5555ffff5555ffffffffffffe22fffffe22fffffffffffffffffffffffffffffffffff
-fffffffffc3333fffc3333fffc3333fffc3333fff552e55ff552455ff553c55ff553b55ffffffffffe2222fffe2222ff8ffffffffcffffffffffffffffffffff
-ffffffffc300003fc300003fc300003fc300003f55622755556227555563375555633755ffffffffe200002fe200002f8ffffffffcffffffffffffffffffffff
-fffffffffc08083ffc08083ffc08083ffc08083f5d6666755d6666755d6666755d666675fffffffffe0c0c2ffe0c0c2f8ffffffffcffffffffffffffffffffff
-fffffffffc00003ffc000033fc000033fc00003f566c6c65566b6b655668686556696965fffffffffe00002ffe00002fffffffffffffffffffffffffffffffff
-ffffffffff300333ff300333ff300333ff3003335d6666655d6666655d6666655d666665ffffffffff200222ff200222ffffffffffffffffffffffffffffffff
-ffffffffffc333f3ffc3333fffc333ffffc333f35d6ddd655d6ddd655d6ddd655d6ddd65ffffffffffe222f2ffe222f2ffffffffffffffffffffffffffffffff
-fffffffffcc333fffc3333ffffc3333fffc333ff5d6666655d6666655d6666655d666665fffffffffee222fffee222ffffffffffffffffffffffffffffffffff
-ff777fffffb33fffffb33fffffb33fffffb33fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-f77777fffb3333fffb3333fffb3333fffb3333ffff7777ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-7777777fb300003fb300003fb300003fb300003ff776c77fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-f777777ffb09093ffb09093ffb09093ffb09093ff76ccc7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-f777777ffb00003ffb000033fb000033fb00003ff7ccc17fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ff777777ff300333ff300333ff300333ff300333f77c177fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-ff7777f7ffb333f3ffb3333fffb333ffffb333f3ff7777ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-f77777fffbb333fffb3333ffffb3333fffb333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ff777fffff422fffff422fffff422fffff422fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+f77777fff42222fff42222fff42222fff42222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+7777777f4200002f4200002f4200002f4200002ffffaaaaffff9999ffff8888fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+f777777ff40b0b2ff40b0b2ff40b0b2ff40b0b2f8f9a777a2f89aaa95f289998ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+f777777ff400002ff4000022f4000022f400002ff9aa777af899aaa9f2889998ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ff777777ff200222ff200222ff200222ff200222fffaaaaffff9999ffff8888fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ff7777f7ff4222f2ff42222fff4222ffff4222f2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+f77777fff44222fff42222ffff42222fff4222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffc33fffffc33fffffc33fffffc33fffff5555ffff5555ffff5555ffff5555ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffc3333fffc3333fffc3333fffc3333fff552e55ff552455ff553c55ff553b55fffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffc300003fc300003fc300003fc300003f55622755556227555563375555633755ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffc08083ffc08083ffc08083ffc08083f5d6666755d6666755d6666755d666675ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffc00003ffc000033fc000033fc00003f566c6c65566b6b655668686556696965ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffff300333ff300333ff300333ff3003335d6666655d6666655d6666655d666665ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffc333f3ffc3333fffc333ffffc333f35d6ddd655d6ddd655d6ddd655d6ddd65ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffcc333fffc3333ffffc3333fffc333ff5d6666655d6666655d6666655d666665ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffb33fffffb33fffffb33fffffb33fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffb3333fffb3333fffb3333fffb3333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffb300003fb300003fb300003fb300003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffb09093ffb09093ffb09093ffb09093fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffb00003ffb000033fb000033fb00003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffff300333ff300333ff300333ff300333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffb333f3ffb3333fffb333ffffb333f3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+fffffffffbb333fffb3333ffffb3333fffb333ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 0000000000000000000611110000000000000000000111116660000066666660000000000000000000000000000000110d000000000000000000000011111111
 00000000000000000011111100111111000000000011111166660000166666660000000000000000000000000000011111160000000000000000000011111111
 000000000000000011111111011111116000000011111111166660001666666660000000000000000000000000006111111100000000000000000000d111111d
