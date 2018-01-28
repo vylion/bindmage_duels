@@ -99,6 +99,10 @@ function garnet_scene:draw()
 	camera(0,0)
 	text("tEAM garnet hAS wON!!!", vcenter("tEAM garnet hAS wON!!!"), "left", pink, dark_pink)
 	text("pRESS any KEY TO restart", vcenter("pRESS any KEY TO restart") + 20, "none", yellow, nil)
+	spr(1,4*8-4,6*8-8)
+	spr(17,5*8-4,6*8-8)
+	spr(tombstone+2, 11*8-4,6*8-8, 1, 1, true)
+	spr(tombstone+3, 12*8-4,6*8-8, 1, 1, true)
 end
 
 
@@ -124,6 +128,10 @@ function emerald_scene:draw()
 	camera(0,0)
 	text("tEAM emerald hAS wON!!!", vcenter(" tEAM emerald hAS wON!!!"), "left", green, dark_green)
 	text("pRESS any KEY TO restart", vcenter("pRESS any KEY TO restart") + 20, "none", yellow, nil)
+	spr(33,4*8-4,6*8-8)
+	spr(49,5*8-4,6*8-8)
+	spr(tombstone+0, 11*8-4,6*8-8, 1, 1, true)
+	spr(tombstone+1, 12*8-4,6*8-8, 1, 1, true)
 end
 
 
